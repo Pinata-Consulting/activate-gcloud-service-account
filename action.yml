@@ -1,0 +1,27 @@
+name: 'Activate Gcloud service account'
+
+inputs:
+  service-account:
+    require: true
+    description: 'Google cloud service account name'
+
+  gcloud-secret:
+    required: true
+    description: 'Google Cloud service account credentials'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate with GCloud
+      id: 'gcloud-auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ inputs.gcloud-secret }}'
+        service_account: '${{ inputs.service-account }}'
+        create_credentials_file: true
+
+    - name: Activate GCloud service account
+      shell: bash
+      run: |
+        gcloud auth activate-service-account ${{ inputs.service-account }} \
+          --key-file=${{ steps.gcloud-auth.outputs.credentials_file_path }}
